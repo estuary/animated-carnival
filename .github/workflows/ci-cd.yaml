@@ -65,6 +65,8 @@ jobs:
           tags: ghcr.io/estuary/animated-carnival:${{ steps.prep.outputs.tag }}
           build-args: |
             DATABASE_URL=postgres://postgres:postgres@localhost:5432/postgres
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Build And Push (mainline)
         if: ${{ github.ref == 'refs/heads/main' }}
@@ -76,4 +78,6 @@ jobs:
           tags: ghcr.io/estuary/animated-carnival:${{ steps.prep.outputs.tag }},ghcr.io/estuary/animated-carnival:latest
           build-args: |
             DATABASE_URL=postgres://postgres:postgres@localhost:5432/postgres
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
       
