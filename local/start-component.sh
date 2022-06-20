@@ -10,8 +10,10 @@ set -e
 
 BROKER_PORT=8080
 CONSUMER_PORT=9000
+POSTGRES_PORT=5432
 export BROKER_ADDRESS=http://localhost:$BROKER_PORT
 export CONSUMER_ADDRESS=http://localhost:$CONSUMER_PORT
+export DATABASE_URL=postgresql://postgres:postgres@localhost:$POSTGRES_PORT/postgres
 
 function log() {
     echo -e "$@" 1>&2
@@ -78,6 +80,8 @@ function start_data_plane_gateway() {
 function start_control_plane() {
     cd "$(project_dir 'animated-carnival')"
     must_run supabase start
+    wait_until_listening $POSTGRES_PORT 'PostgreSQL'
+    must_run psql $DATABASE_URL -f ./scripts/seed_connectors.sql
 }
 
 function start_control_plane_agent() {
@@ -90,7 +94,7 @@ function start_control_plane_agent() {
     wait_until_listening $BROKER_PORT 'Gazette broker'
     wait_until_listening $CONSUMER_PORT 'Flow reactor'
 
-    # Now we're finally ready to run this thing. 
+    # Now we're finally ready to run this thing.
     # Use the resolved flow project directory to set the --bin-dir argument.
     # We're counting on `make package` to have completed successfully at this point, which should be
     # the case if the temp-data-plane is running.
