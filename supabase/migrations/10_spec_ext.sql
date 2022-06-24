@@ -78,7 +78,17 @@ comment on view combined_grants_ext is
 -- Extended view of live catalog specifications.
 create view live_specs_ext as
 select
-  l.*,
+  l.detail,
+  l.id,
+  l.updated_at,
+  l.catalog_name,
+  l.connector_image_name,
+  l.connector_image_tag,
+  l.last_pub_id,
+  l.reads_from,
+  l.spec,
+  l.spec_type,
+  l.writes_to,
   c.external_url as connector_external_url,
   c.id as connector_id,
   c.open_graph as connector_open_graph,
