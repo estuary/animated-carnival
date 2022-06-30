@@ -28,13 +28,15 @@ returns setof text as $$
     ('33333333-3333-3333-3333-333333333333', 'carolCo/', 'read')
   ;
 
+  -- Note that subject roles have inconsistent casing with user grants.
+  -- This should not matter.
   delete from role_grants;
   insert into role_grants (subject_role, object_role, capability) values
-    ('aliceCo/widgets/', 'bobCo/burgers/', 'admin'),
-    ('aliceCo/anvils/', 'carolCo/paper/', 'write'),
+    ('AliceCo/widgets/', 'bobCo/burgers/', 'admin'),
+    ('aliceCO/anvils/', 'carolCo/paper/', 'write'),
     ('aliceCo/duplicate/', 'carolCo/paper/', 'read'),
     ('aliceCo/stuff/', 'carolCo/shared/', 'read'),
-    ('carolCo/shared/', 'carolCo/hidden/', 'read')
+    ('CarolCO/shared/', 'carolCo/hidden/', 'read')
   ;
 
   select results_eq(
@@ -86,14 +88,16 @@ returns setof text as $$
     'carol roles'
   );
 
+  -- Expect a number of authorization check fixtures match the expectation.
+  -- Checks are invariant to casing of the granted prefix.
   select ok(auth_catalog('aliceCo/some/thing', 'write'));
-  select ok(auth_catalog('aliceCo/other/thing/', 'admin'));
+  select ok(auth_catalog('AliceCo/other/thing/', 'admin'));
   select ok(auth_catalog('bobCo/burgers/time/', 'admin'));
   select ok(auth_catalog('carolCo/paper/company', 'write'));
-  select ok(auth_catalog('carolCo/shared/thing', 'read'));
+  select ok(auth_catalog('CarolCO/shared/thing', 'read'));
 
   select ok(not auth_catalog('carolCo/shared/thing', 'write'));
-  select ok(not auth_catalog('carolCo/hidden/thing', 'read'));
-  select ok(not auth_catalog('carolCo/paper/company', 'admin'));
+  select ok(not auth_catalog('CarolCo/hidden/thing', 'read'));
+  select ok(not auth_catalog('carolCO/paper/company', 'admin'));
 
 $$ language sql;
