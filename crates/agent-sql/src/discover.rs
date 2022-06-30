@@ -98,7 +98,8 @@ where
             spec,
             spec_type
         ) values ($1, $2, $3, $4)
-        on conflict (draft_id, catalog_name) do update set
+        on conflict (draft_id, lower(catalog_name)) do update set
+            catalog_name = $2,
             spec = $3,
             spec_type = $4
         returning 1 as "must_exist";

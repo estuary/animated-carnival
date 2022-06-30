@@ -55,7 +55,6 @@ create table draft_specs (
 
   draft_id      flowid not null references drafts(id) on delete cascade,
   catalog_name  catalog_name not null,
-  unique (draft_id, catalog_name),
 
   expect_pub_id   flowid default null,
   spec            json,
@@ -66,6 +65,10 @@ create table draft_specs (
   )
 );
 alter table draft_specs enable row level security;
+
+-- specs of a draft are unique on lower-case catalog name.
+create unique index idx_draft_specs_catalog_name on draft_specs
+  (draft_id, lower(catalog_name));
 
 create policy "Users access their draft specs"
   on draft_specs as permissive

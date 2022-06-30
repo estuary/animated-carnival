@@ -62,7 +62,7 @@ alter table live_specs enable row level security;
 -- and we don't use ordering operators ( >, >=, <) on catalog_names.
 -- See: https://www.postgresql.org/docs/current/indexes-opclass.html
 create unique index idx_live_specs_catalog_name on live_specs
-  (catalog_name text_pattern_ops);
+  (lower(catalog_name) text_pattern_ops);
 
 create policy "Users must be read-authorized to the specification catalog name"
   on live_specs as permissive for select
@@ -102,6 +102,37 @@ List of collections written by this catalog task specification,
 or NULL if not applicable to this specification type.
 These adjacencies are also indexed within `live_spec_flows`.
 ';
+
+
+-- Create a consistency-check trigger which enforces that no live specification
+-- may be a directory-like prefix of another live specification.
+-- For example, 'foo/bar' and 'foo/barbaz' is allowed, but 'foo/bar' and 'foo/bar/baz' is not.
+create function internal.live_specs_catalog_name_prefix_check()
+returns trigger as $$
+declare
+  -- Found name which conflicts with the proposed `live_specs.catalog_name`
+  conflict_name text;
+begin
+  -- Search for an existing row which is a case-invariant prefix match of the proposed row.
+  select cur.catalog_name into conflict_name from live_specs as cur
+  where
+    starts_with(lower(new.catalog_name), lower(cur.catalog_name) || '/') or
+    starts_with(lower(cur.catalog_name), lower(new.catalog_name) || '/')
+  limit 1;
+
+  if found then
+    raise 'Conflicting catalog names: % vs %', new.catalog_name, conflict_name
+      using errcode = 'unique_violation';
+  end if;
+
+  return new;
+end;
+$$ language plpgsql
+security definer;
+
+create trigger live_specs_catalog_name_prefix_check
+before insert or update of catalog_name on live_specs
+  for each row execute procedure internal.live_specs_catalog_name_prefix_check();
 
 
 -- Data-flows between live specifications.
