@@ -24,7 +24,7 @@ export async function authURL(req: {connector_id: string; config : object}) {
       {verification_token : Math.random().toString(), connector_id}));
   const redirect_uri = "https://dashboard.estuary.dev/oauth";
 
-  const template = Handlebars.compile(oauth2_spec.authUrlTemplate);
+  const template = Handlebars.compile(oauth2_spec.auth_url_template);
   const url =
       template({state, redirect_uri, client_id : oauth2_client_id, config});
 
