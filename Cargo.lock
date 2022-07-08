@@ -17,6 +17,7 @@ dependencies = [
  "insta",
  "itertools",
  "models",
+ "proto-flow 0.0.0",
  "reqwest",
  "rusqlite",
  "scopeguard",
@@ -92,8 +93,8 @@ dependencies = [
  "lazy_static",
  "models",
  "percent-encoding",
- "proto-flow",
- "proto-gazette",
+ "proto-flow 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
+ "proto-gazette 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
  "regex",
  "serde",
  "serde_json",
@@ -654,7 +655,7 @@ dependencies = [
  "labels",
  "models",
  "postgrest",
- "proto-flow",
+ "proto-flow 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
  "reqwest",
  "serde",
  "serde-transcode",
@@ -1732,7 +1733,26 @@ dependencies = [
 [[package]]
 name = "proto-build"
 version = "0.0.0"
+
+[[package]]
+name = "proto-build"
+version = "0.0.0"
 source = "git+https://github.com/estuary/flow?branch=master#6e8e83ebd8ff73f4817223cb476e16ed03f8091e"
+
+[[package]]
+name = "proto-flow"
+version = "0.0.0"
+dependencies = [
+ "bytes",
+ "pbjson",
+ "pbjson-build",
+ "pbjson-types",
+ "prost",
+ "prost-build",
+ "proto-build 0.0.0",
+ "proto-gazette 0.0.0",
+ "serde",
+]
 
 [[package]]
 name = "proto-flow"
@@ -1745,8 +1765,22 @@ dependencies = [
  "pbjson-types",
  "prost",
  "prost-build",
- "proto-build",
- "proto-gazette",
+ "proto-build 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
+ "proto-gazette 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
+ "serde",
+]
+
+[[package]]
+name = "proto-gazette"
+version = "0.0.0"
+dependencies = [
+ "bytes",
+ "pbjson",
+ "pbjson-build",
+ "pbjson-types",
+ "prost",
+ "prost-build",
+ "proto-build 0.0.0",
  "serde",
 ]
 
@@ -1761,7 +1795,7 @@ dependencies = [
  "pbjson-types",
  "prost",
  "prost-build",
- "proto-build",
+ "proto-build 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
  "serde",
 ]
 
@@ -2193,7 +2227,7 @@ dependencies = [
  "futures",
  "json",
  "models",
- "proto-flow",
+ "proto-flow 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
  "schemars",
  "serde",
  "serde-transcode",
@@ -2381,8 +2415,8 @@ dependencies = [
  "models",
  "pathfinding",
  "prost",
- "proto-flow",
- "proto-gazette",
+ "proto-flow 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
+ "proto-gazette 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
  "rusqlite",
  "serde",
  "serde_json",
@@ -2776,7 +2810,7 @@ dependencies = [
  "labels",
  "lazy_static",
  "models",
- "proto-flow",
+ "proto-flow 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
  "regex",
  "serde_json",
  "strsim",
