@@ -16,14 +16,15 @@ dependencies = [
  "futures",
  "insta",
  "itertools",
- "models",
+ "models 0.0.0 (git+https://github.com/estuary/flow?branch=johnny/pattern-errors)",
  "reqwest",
  "rusqlite",
+ "schemars",
  "scopeguard",
  "serde",
  "serde_json",
  "sqlx",
- "tables",
+ "tables 0.0.0 (git+https://github.com/estuary/flow?branch=johnny/pattern-errors)",
  "tempfile",
  "thiserror",
  "tokio",
@@ -31,6 +32,7 @@ dependencies = [
  "tracing",
  "tracing-subscriber",
  "url",
+ "validator",
 ]
 
 [[package]]
@@ -39,6 +41,7 @@ version = "0.1.0"
 dependencies = [
  "chrono",
  "insta",
+ "schemars",
  "serde",
  "serde_json",
  "sqlx",
@@ -86,20 +89,20 @@ version = "0.0.0"
 source = "git+https://github.com/estuary/flow?branch=master#6e8e83ebd8ff73f4817223cb476e16ed03f8091e"
 dependencies = [
  "bytes",
- "doc",
+ "doc 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
  "itertools",
- "json",
- "labels",
+ "json 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
+ "labels 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
  "lazy_static",
- "models",
+ "models 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
  "percent-encoding",
- "proto-flow",
- "proto-gazette",
+ "proto-flow 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
+ "proto-gazette 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
  "regex",
  "serde",
  "serde_json",
  "superslice",
- "tables",
+ "tables 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
  "thiserror",
  "tracing",
  "typescript",
@@ -536,11 +539,28 @@ dependencies = [
 [[package]]
 name = "doc"
 version = "0.0.0"
+source = "git+https://github.com/estuary/flow?branch=johnny/pattern-errors#ffeef4da6626e1f53c3aff0a762930cec700095d"
+dependencies = [
+ "fancy-regex",
+ "itertools",
+ "json 0.0.0 (git+https://github.com/estuary/flow?branch=johnny/pattern-errors)",
+ "lazy_static",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "tinyvec",
+ "tracing",
+ "url",
+]
+
+[[package]]
+name = "doc"
+version = "0.0.0"
 source = "git+https://github.com/estuary/flow?branch=master#6e8e83ebd8ff73f4817223cb476e16ed03f8091e"
 dependencies = [
  "fancy-regex",
  "itertools",
- "json",
+ "json 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
  "lazy_static",
  "serde",
  "serde_json",
@@ -649,13 +669,13 @@ dependencies = [
  "clap",
  "comfy-table",
  "dirs",
- "doc",
+ "doc 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
  "futures",
  "itertools",
- "labels",
- "models",
+ "labels 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
+ "models 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
  "postgrest",
- "proto-flow",
+ "proto-flow 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
  "reqwest",
  "serde",
  "serde-transcode",
@@ -663,7 +683,7 @@ dependencies = [
  "serde_yaml",
  "sources",
  "superslice",
- "tables",
+ "tables 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
  "tempfile",
  "time 0.3.11",
  "tokio",
@@ -1134,6 +1154,23 @@ dependencies = [
 [[package]]
 name = "json"
 version = "0.0.0"
+source = "git+https://github.com/estuary/flow?branch=johnny/pattern-errors#ffeef4da6626e1f53c3aff0a762930cec700095d"
+dependencies = [
+ "bitvec",
+ "fancy-regex",
+ "fxhash",
+ "itertools",
+ "percent-encoding",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "tracing",
+ "url",
+]
+
+[[package]]
+name = "json"
+version = "0.0.0"
 source = "git+https://github.com/estuary/flow?branch=master#6e8e83ebd8ff73f4817223cb476e16ed03f8091e"
 dependencies = [
  "bitvec",
@@ -1147,6 +1184,11 @@ dependencies = [
  "tracing",
  "url",
 ]
+
+[[package]]
+name = "labels"
+version = "0.0.0"
+source = "git+https://github.com/estuary/flow?branch=johnny/pattern-errors#ffeef4da6626e1f53c3aff0a762930cec700095d"
 
 [[package]]
 name = "labels"
@@ -1264,13 +1306,35 @@ dependencies = [
 [[package]]
 name = "models"
 version = "0.0.0"
+source = "git+https://github.com/estuary/flow?branch=johnny/pattern-errors#ffeef4da6626e1f53c3aff0a762930cec700095d"
+dependencies = [
+ "caseless",
+ "doc 0.0.0 (git+https://github.com/estuary/flow?branch=johnny/pattern-errors)",
+ "humantime-serde",
+ "json 0.0.0 (git+https://github.com/estuary/flow?branch=johnny/pattern-errors)",
+ "labels 0.0.0 (git+https://github.com/estuary/flow?branch=johnny/pattern-errors)",
+ "lazy_static",
+ "pathfinding",
+ "regex",
+ "schemars",
+ "serde",
+ "serde_json",
+ "superslice",
+ "unicode-normalization",
+ "url",
+ "validator",
+]
+
+[[package]]
+name = "models"
+version = "0.0.0"
 source = "git+https://github.com/estuary/flow?branch=master#6e8e83ebd8ff73f4817223cb476e16ed03f8091e"
 dependencies = [
  "caseless",
- "doc",
+ "doc 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
  "humantime-serde",
- "json",
- "labels",
+ "json 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
+ "labels 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
  "lazy_static",
  "pathfinding",
  "regex",
@@ -1733,7 +1797,28 @@ dependencies = [
 [[package]]
 name = "proto-build"
 version = "0.0.0"
+source = "git+https://github.com/estuary/flow?branch=johnny/pattern-errors#ffeef4da6626e1f53c3aff0a762930cec700095d"
+
+[[package]]
+name = "proto-build"
+version = "0.0.0"
 source = "git+https://github.com/estuary/flow?branch=master#6e8e83ebd8ff73f4817223cb476e16ed03f8091e"
+
+[[package]]
+name = "proto-flow"
+version = "0.0.0"
+source = "git+https://github.com/estuary/flow?branch=johnny/pattern-errors#ffeef4da6626e1f53c3aff0a762930cec700095d"
+dependencies = [
+ "bytes",
+ "pbjson",
+ "pbjson-build",
+ "pbjson-types",
+ "prost",
+ "prost-build",
+ "proto-build 0.0.0 (git+https://github.com/estuary/flow?branch=johnny/pattern-errors)",
+ "proto-gazette 0.0.0 (git+https://github.com/estuary/flow?branch=johnny/pattern-errors)",
+ "serde",
+]
 
 [[package]]
 name = "proto-flow"
@@ -1746,8 +1831,23 @@ dependencies = [
  "pbjson-types",
  "prost",
  "prost-build",
- "proto-build",
- "proto-gazette",
+ "proto-build 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
+ "proto-gazette 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
+ "serde",
+]
+
+[[package]]
+name = "proto-gazette"
+version = "0.0.0"
+source = "git+https://github.com/estuary/flow?branch=johnny/pattern-errors#ffeef4da6626e1f53c3aff0a762930cec700095d"
+dependencies = [
+ "bytes",
+ "pbjson",
+ "pbjson-build",
+ "pbjson-types",
+ "prost",
+ "prost-build",
+ "proto-build 0.0.0 (git+https://github.com/estuary/flow?branch=johnny/pattern-errors)",
  "serde",
 ]
 
@@ -1762,7 +1862,7 @@ dependencies = [
  "pbjson-types",
  "prost",
  "prost-build",
- "proto-build",
+ "proto-build 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
  "serde",
 ]
 
@@ -2190,17 +2290,17 @@ dependencies = [
  "assemble",
  "base64",
  "bytes",
- "doc",
+ "doc 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
  "futures",
- "json",
- "models",
- "proto-flow",
+ "json 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
+ "models 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
+ "proto-flow 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
  "schemars",
  "serde",
  "serde-transcode",
  "serde_json",
  "serde_yaml",
- "tables",
+ "tables 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
  "thiserror",
  "tracing",
  "url",
@@ -2372,19 +2472,40 @@ dependencies = [
 [[package]]
 name = "tables"
 version = "0.0.0"
+source = "git+https://github.com/estuary/flow?branch=johnny/pattern-errors#ffeef4da6626e1f53c3aff0a762930cec700095d"
+dependencies = [
+ "anyhow",
+ "bytes",
+ "doc 0.0.0 (git+https://github.com/estuary/flow?branch=johnny/pattern-errors)",
+ "json 0.0.0 (git+https://github.com/estuary/flow?branch=johnny/pattern-errors)",
+ "labels 0.0.0 (git+https://github.com/estuary/flow?branch=johnny/pattern-errors)",
+ "models 0.0.0 (git+https://github.com/estuary/flow?branch=johnny/pattern-errors)",
+ "pathfinding",
+ "prost",
+ "proto-flow 0.0.0 (git+https://github.com/estuary/flow?branch=johnny/pattern-errors)",
+ "proto-gazette 0.0.0 (git+https://github.com/estuary/flow?branch=johnny/pattern-errors)",
+ "rusqlite",
+ "serde",
+ "serde_json",
+ "superslice",
+ "url",
+]
+
+[[package]]
+name = "tables"
+version = "0.0.0"
 source = "git+https://github.com/estuary/flow?branch=master#6e8e83ebd8ff73f4817223cb476e16ed03f8091e"
 dependencies = [
  "anyhow",
  "bytes",
- "doc",
- "json",
- "labels",
- "models",
+ "doc 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
+ "json 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
+ "labels 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
+ "models 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
  "pathfinding",
  "prost",
- "proto-flow",
- "proto-gazette",
- "rusqlite",
+ "proto-flow 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
+ "proto-gazette 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
  "serde",
  "serde_json",
  "superslice",
@@ -2681,8 +2802,8 @@ name = "typescript"
 version = "0.0.0"
 source = "git+https://github.com/estuary/flow?branch=master#6e8e83ebd8ff73f4817223cb476e16ed03f8091e"
 dependencies = [
- "doc",
- "json",
+ "doc 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
+ "json 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
  "lazy_static",
  "regex",
  "serde_json",
@@ -2770,19 +2891,19 @@ dependencies = [
  "anyhow",
  "assemble",
  "bytes",
- "doc",
+ "doc 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
  "futures",
  "itertools",
- "json",
- "labels",
+ "json 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
+ "labels 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
  "lazy_static",
- "models",
- "proto-flow",
+ "models 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
+ "proto-flow 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
  "regex",
  "serde_json",
  "strsim",
  "superslice",
- "tables",
+ "tables 0.0.0 (git+https://github.com/estuary/flow?branch=master)",
  "thiserror",
  "tracing",
  "url",
