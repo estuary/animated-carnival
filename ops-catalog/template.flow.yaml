@@ -1,0 +1,114 @@
+collections:
+  ops/TENANT/stats:
+    schema: ops-stats-schema.json
+    key: [/shard/name, /shard/keyBegin, /shard/rClockBegin, /ts]
+    projections:
+      kind: /shard/kind
+      name: /shard/name
+      key_begin: /shard/keyBegin
+      rclock_begin: /shard/rClockBegin
+
+  ops/TENANT/logs:
+    schema: ops-log-schema.json
+    key: [/shard/name, /shard/keyBegin, /shard/rClockBegin, /ts]
+    projections:
+      kind: /shard/kind
+      name: /shard/name
+      key_begin: /shard/keyBegin
+      rclock_begin: /shard/rClockBegin
+
+  ops/TENANT/stats-by-hour:
+    schema: ops-stats-schema.json
+    key: [/shard/name, /shard/keyBegin, /shard/rClockBegin, /ts]
+    projections:
+      kind: /shard/kind
+      name: /shard/name
+      key_begin: /shard/keyBegin
+      rclock_begin: /shard/rClockBegin
+
+    derivation:
+      shards:
+        minTxnDuration: 30s
+      typescript: { module: "by-hour.ts" }
+      transform:
+        byHour:
+          source:
+            name: ops/TENANT/stats
+          publish: { lambda: typescript }
+
+materializations:
+  ops/prod/stats/TENANT:
+    endpoint:
+      connector:
+        image: ghcr.io/estuary/materialize-postgres:v1
+        config: stats-materialization-endpoint.sops.yaml
+
+    bindings:
+      - source: ops/TENANT/stats-by-hour
+        resource:
+          table: task_stats_TENANT
+        fields:
+          recommended: false
+          include:
+            kind: {}
+            name: {}
+            key_begin: {}
+            rclock_begin: {}
+            ts: {}
+            flow_document: {}
+
+tests:
+  ops/TENANT/stat-rollups:
+    - ingest:
+        collection: ops/TENANT/stats
+        documents:
+          - shard: &shard
+              kind: capture
+              name: tenant/test/cap
+              keyBegin: "00000000"
+              rClockBegin: "00000000"
+            ts: "2022-04-03T01:02:03.45678Z"
+            capture:
+              tenant/test/collection:
+                right: { docsTotal: 3, bytesTotal: 99 }
+                out: { docsTotal: 3, bytesTotal: 99 }
+            txnCount: 2
+            openSecondsTotal: 0.012
+          - shard: *shard
+            ts: "2022-04-03T01:37:33.45678Z"
+            capture:
+              tenant/test/collection:
+                right: { docsTotal: 1, bytesTotal: 2 }
+                out: { docsTotal: 2, bytesTotal: 4 }
+            txnCount: 1
+            openSecondsTotal: 0.02
+          - shard: *shard
+            ts: "2022-04-03T02:04:00.123Z"
+            capture:
+              tenant/test/collection:
+                right: { docsTotal: 3, bytesTotal: 8 }
+                out: { docsTotal: 7, bytesTotal: 9 }
+            txnCount: 1
+            openSecondsTotal: 0.03
+    - verify:
+        collection: ops/TENANT/stats-by-hour
+        documents:
+          - shard: *shard
+            ts: "2022-04-03T01:00:00.000Z"
+            capture:
+              tenant/test/collection:
+                right: { docsTotal: 4, bytesTotal: 101 }
+                out: { docsTotal: 5, bytesTotal: 103 }
+            txnCount: 3
+            openSecondsTotal: 0.032
+          - shard: *shard
+            ts: "2022-04-03T02:00:00.000Z"
+            capture:
+              tenant/test/collection:
+                right: { docsTotal: 3, bytesTotal: 8 }
+                out: { docsTotal: 7, bytesTotal: 9 }
+            txnCount: 1
+            openSecondsTotal: 0.03
+
+storageMappings:
+  "": { stores: [{ provider: S3, bucket: a-bucket }] }

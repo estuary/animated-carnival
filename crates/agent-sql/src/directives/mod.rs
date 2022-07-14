@@ -5,6 +5,7 @@ use serde::Serialize;
 use serde_json::value::RawValue;
 use sqlx::types::Uuid;
 
+pub mod beta_onboard;
 pub mod grant;
 
 // Row is the dequeued task shape of an applied directive operation.
