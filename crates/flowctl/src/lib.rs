@@ -48,27 +48,48 @@ pub enum Command {
     Raw(raw::Advanced),
 }
 
+pub fn locate_and_read_config(profile: &str) -> anyhow::Result<config::Config> {
+    let config_dir = dirs::config_dir()
+        .context("couldn't determine user config directory")?
+        .join("flowctl");
+    std::fs::create_dir_all(&config_dir).context("couldn't create user config directory")?;
+
+    let config_file = config_dir.join(format!("{}.json", profile));
+
+    let mut config = config::Config::default();
+    match std::fs::read(&config_file) {
+        Ok(v) => {
+            config = serde_json::from_slice(&v).context("parsing config")?;
+        }
+        Err(err) if err.kind() == std::io::ErrorKind::NotFound => {
+            // Pass.
+        }
+        Err(err) => {
+            Err(err).context("opening config")?;
+        }
+    }
+
+    return Ok(config)
+}
+
+pub fn write_config(profile: &str, config: &config::Config) -> anyhow::Result<()> {
+    let config_dir = dirs::config_dir()
+        .context("couldn't determine user config directory")?
+        .join("flowctl");
+    std::fs::create_dir_all(&config_dir).context("couldn't create user config directory")?;
+
+    let config_file = config_dir.join(format!("{}.json", profile));
+
+
+    std::fs::write(&config_file, &serde_json::to_vec(&config).unwrap())
+        .context("writing config")?;
+
+    Ok(())
+}
+
 impl Cli {
     pub async fn run(&self) -> anyhow::Result<()> {
-        let config_dir = dirs::config_dir()
-            .context("couldn't determine user config directory")?
-            .join("flowctl");
-        std::fs::create_dir_all(&config_dir).context("couldn't create user config directory")?;
-
-        let config_file = config_dir.join(format!("{}.json", &self.profile));
-
-        let mut config = config::Config::default();
-        match std::fs::read(&config_file) {
-            Ok(v) => {
-                config = serde_json::from_slice(&v).context("parsing config")?;
-            }
-            Err(err) if err.kind() == std::io::ErrorKind::NotFound => {
-                // Pass.
-            }
-            Err(err) => {
-                Err(err).context("opening config")?;
-            }
-        }
+        let mut config = locate_and_read_config(&self.profile)?;
 
         match &self.cmd {
             Command::Auth(auth) => auth.run(&mut config).await,
@@ -78,8 +99,7 @@ impl Cli {
             Command::Raw(advanced) => advanced.run(&mut config).await,
         }?;
 
-        std::fs::write(&config_file, &serde_json::to_vec(&config).unwrap())
-            .context("writing config")?;
+        write_config(&self.profile, &config)?;
 
         Ok(())
     }
