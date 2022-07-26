@@ -20,7 +20,7 @@ begin
     'https://github.com/estuary/connectors/tree/main/source-hello-world'
   )
   returning id strict into connector_id;
-  insert into connector_tags (connector_id, image_tag) values (connector_id, ':dev');
+  insert into connector_tags (connector_id, image_tag) values (connector_id, ':v1');
 
   insert into connectors (image_name, detail, external_url) values (
     'ghcr.io/estuary/source-postgres',
@@ -28,7 +28,7 @@ begin
     'https://postgresql.org'
   )
   returning id strict into connector_id;
-  insert into connector_tags (connector_id, image_tag) values (connector_id, ':dev');
+  insert into connector_tags (connector_id, image_tag) values (connector_id, ':v1');
 
   insert into connectors (image_name, detail, external_url) values (
     'ghcr.io/estuary/materialize-postgres',
@@ -36,7 +36,7 @@ begin
     'https://postgresql.org'
   )
   returning id strict into connector_id;
-  insert into connector_tags (connector_id, image_tag) values (connector_id, ':dev');
+  insert into connector_tags (connector_id, image_tag) values (connector_id, ':v1');
 
   insert into connectors (image_name, detail, external_url) values (
     'ghcr.io/estuary/materialize-rockset',
@@ -44,7 +44,7 @@ begin
     'https://rockset.com/'
   )
   returning id strict into connector_id;
-  insert into connector_tags (connector_id, image_tag) values (connector_id, ':dev');
+  insert into connector_tags (connector_id, image_tag) values (connector_id, ':v1');
 
   insert into connectors (image_name, detail, external_url) values (
     'ghcr.io/estuary/materialize-firebolt',
@@ -52,7 +52,7 @@ begin
     'https://www.firebolt.io/'
   )
   returning id strict into connector_id;
-  insert into connector_tags (connector_id, image_tag) values (connector_id, ':dev');
+  insert into connector_tags (connector_id, image_tag) values (connector_id, ':v1');
 
   insert into connectors (image_name, detail, external_url) values (
     'ghcr.io/estuary/source-mysql',
@@ -60,7 +60,7 @@ begin
     'https://www.mysql.com/'
   )
   returning id strict into connector_id;
-  insert into connector_tags (connector_id, image_tag) values (connector_id, ':dev');
+  insert into connector_tags (connector_id, image_tag) values (connector_id, ':v1');
 
   insert into connectors (image_name, detail, external_url) values (
     'ghcr.io/estuary/source-s3',
@@ -68,7 +68,7 @@ begin
     'https://aws.amazon.com/s3/'
   )
   returning id strict into connector_id;
-  insert into connector_tags (connector_id, image_tag) values (connector_id, ':dev');
+  insert into connector_tags (connector_id, image_tag) values (connector_id, ':v1');
 
   insert into connectors (image_name, detail, external_url) values (
     'ghcr.io/estuary/source-gcs',
@@ -76,7 +76,7 @@ begin
     'https://cloud.google.com/storage'
   )
   returning id strict into connector_id;
-  insert into connector_tags (connector_id, image_tag) values (connector_id, ':dev');
+  insert into connector_tags (connector_id, image_tag) values (connector_id, ':v1');
 
   insert into connectors (image_name, detail, external_url) values (
     'ghcr.io/estuary/source-kinesis',
@@ -84,7 +84,7 @@ begin
     'https://aws.amazon.com/kinesis/'
   )
   returning id strict into connector_id;
-  insert into connector_tags (connector_id, image_tag) values (connector_id, ':dev');
+  insert into connector_tags (connector_id, image_tag) values (connector_id, ':v1');
 
   insert into connectors (image_name, detail, external_url) values (
     'ghcr.io/estuary/source-kafka',
@@ -92,7 +92,7 @@ begin
     'https://kafka.apache.org/'
   )
   returning id strict into connector_id;
-  insert into connector_tags (connector_id, image_tag) values (connector_id, ':dev');
+  insert into connector_tags (connector_id, image_tag) values (connector_id, ':v1');
 
   insert into connectors (image_name, detail, external_url) values (
     'ghcr.io/estuary/materialize-bigquery',
@@ -100,7 +100,7 @@ begin
     'https://cloud.google.com/bigquery'
   )
   returning id strict into connector_id;
-  insert into connector_tags (connector_id, image_tag) values (connector_id, ':dev');
+  insert into connector_tags (connector_id, image_tag) values (connector_id, ':v1');
 
   insert into connectors (image_name, detail, external_url) values (
     'ghcr.io/estuary/materialize-snowflake',
@@ -108,7 +108,7 @@ begin
     'https://www.snowflake.com/'
   )
   returning id strict into connector_id;
-  insert into connector_tags (connector_id, image_tag) values (connector_id, ':dev');
+  insert into connector_tags (connector_id, image_tag) values (connector_id, ':v1');
 
   insert into connectors (image_name, detail, external_url) values (
     'ghcr.io/estuary/materialize-s3-parquet',
@@ -116,7 +116,7 @@ begin
     'https://aws.amazon.com/s3/'
   )
   returning id strict into connector_id;
-  insert into connector_tags (connector_id, image_tag) values (connector_id, ':dev');
+  insert into connector_tags (connector_id, image_tag) values (connector_id, ':v1');
 
   insert into connectors (image_name, detail, external_url) values (
     'ghcr.io/estuary/materialize-elasticsearch',
@@ -124,7 +124,7 @@ begin
     'https://www.elastic.co/elasticsearch/'
   )
   returning id strict into connector_id;
-  insert into connector_tags (connector_id, image_tag) values (connector_id, ':dev');
+  insert into connector_tags (connector_id, image_tag) values (connector_id, ':v1');
 
   insert into connectors (image_name, detail, external_url) values (
     'airbyte/source-exchange-rates',
