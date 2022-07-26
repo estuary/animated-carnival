@@ -5,7 +5,7 @@ import { corsHeaders } from "../_shared/cors.ts";
 export async function authURL(req: {
   connector_id: string;
   config: object;
-  redirect_uri: string;
+  redirect_uri?: string;
 }) {
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
@@ -39,7 +39,7 @@ export async function authURL(req: {
   const template = Handlebars.compile(oauth2_spec.authUrlTemplate);
   const url = template({
     state,
-    redirect_uri,
+    redirect_uri: redirect_uri ?? "https://dashboard.estuary.dev/oauth",
     client_id: oauth2_client_id,
     config,
   });
