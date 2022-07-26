@@ -80,11 +80,15 @@ create table user_grants (
 
   user_id      uuid references auth.users(id) not null,
   object_role  catalog_prefix   not null,
-  capability   grant_capability not null,
-
-  unique(user_id, object_role)
+  capability   grant_capability not null
 );
 alter table user_grants enable row level security;
+
+-- text_pattern_ops accelerates prefix lookups (starts_with),
+-- but disables ordering operators ( >, >=, <) which we don't use.
+-- See: https://www.postgresql.org/docs/current/indexes-opclass.html
+create unique index idx_user_grants_user_obj on user_grants
+  (user_id, lower(object_role) text_pattern_ops);
 
 comment on table user_grants is
   'Roles and capabilities that the user has been granted';
@@ -106,12 +110,9 @@ create table role_grants (
 );
 alter table role_grants enable row level security;
 
--- text_pattern_ops enables the index to accelerate prefix lookups.
--- starts_with() is common when searching role_grants and we don't use
--- ordering operators ( >, >=, <) on subject or object roles.
--- See: https://www.postgresql.org/docs/current/indexes-opclass.html
+-- text_pattern_ops accelerates prefix lookups (starts_with).
 create unique index idx_role_grants_sub_obj on role_grants
-  (subject_role text_pattern_ops, object_role text_pattern_ops);
+  (lower(subject_role) text_pattern_ops, lower(object_role) text_pattern_ops);
 
 comment on table role_grants is
   'Roles and capabilities that roles have been granted to other roles';
@@ -135,7 +136,7 @@ returns table (role_prefix catalog_prefix, capability grant_capability) as $$
       -- project through grants where object_role acts as the subject_role.
       select role_grants.object_role, role_grants.capability
       from role_grants, all_roles
-      where starts_with(role_grants.subject_role, all_roles.role_prefix)
+      where starts_with(lower(role_grants.subject_role), lower(all_roles.role_prefix))
         and all_roles.capability = 'admin'
   )
   select role_prefix, capability from all_roles;
@@ -155,7 +156,7 @@ create function auth_catalog(name_or_prefix text, min_cap grant_capability)
 returns boolean as $$
   select exists(
     select 1 from auth_roles() r
-    where starts_with(name_or_prefix, r.role_prefix) and r.capability >= min_cap
+    where starts_with(lower(name_or_prefix), lower(r.role_prefix)) and r.capability >= min_cap
   )
 $$ language sql stable;
 comment on function auth_catalog is
