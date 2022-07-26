@@ -22,7 +22,7 @@ export async function authURL(req: {
 
   if (error != null) {
     return new Response(JSON.stringify(error), {
-      headers: { "Content-Type": "application/json" },
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 400,
     });
   }
