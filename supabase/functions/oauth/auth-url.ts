@@ -44,7 +44,7 @@ export async function authURL(req: {
     config,
   });
 
-  return new Response(JSON.stringify({ url: url }), {
+  return new Response(JSON.stringify({ url: url, state }), {
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 }
