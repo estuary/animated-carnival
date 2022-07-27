@@ -9,7 +9,7 @@ export async function accessToken(req: Record<string, any>) {
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
   );
-  const { state, config, ...params } = req;
+  const { state, config, redirect_uri, ...params } = req;
 
   const decodedState = JSON.parse(atob(state));
   const { connector_id } = decodedState;
@@ -29,11 +29,9 @@ export async function accessToken(req: Record<string, any>) {
 
   const { oauth2_spec, oauth2_client_id, oauth2_client_secret } = data;
 
-  const redirect_uri = "https://dashboard.estuary.dev/oauth";
-
   const urlTemplate = Handlebars.compile(oauth2_spec.accessTokenUrlTemplate);
   const url = urlTemplate({
-    redirect_uri,
+    redirect_uri: redirect_uri ?? "https://dashboard.estuary.dev/oauth",
     client_id: oauth2_client_id,
     client_secret: oauth2_client_secret,
     config,
