@@ -37,12 +37,14 @@ export async function authURL(req: {
   );
 
   const template = Handlebars.compile(oauth2_spec.authUrlTemplate);
-  const url = template({
-    state,
-    redirect_uri: redirect_uri ?? "https://dashboard.estuary.dev/oauth",
-    client_id: oauth2_client_id,
-    config,
-  });
+  const url = encodeURI(
+    template({
+      state,
+      redirect_uri: redirect_uri ?? "https://dashboard.estuary.dev/oauth",
+      client_id: oauth2_client_id,
+      config,
+    })
+  );
 
   return new Response(JSON.stringify({ url: url, state }), {
     headers: { ...corsHeaders, "Content-Type": "application/json" },
