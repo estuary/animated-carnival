@@ -21,7 +21,7 @@ Not everything can be done in SQL. More complex interactions, validations, and r
 
 Flow's user-interface is a single-page React application hosted at [dashboard.estuary.dev](https://dashboard.estuary.dev). It's repository is [github.com/estuary/ui](https://github.com/estuary/ui). The UI uses the Supabase APIs.
 
-We also develop a full featured command-line interface client `flowctl`, which lives under [crates/flowctl/](crates/flowctl/) of this repo. Currently it must be built from its Rust source. Release binaries for various platforms are a TODO.
+We also develop a full featured command-line interface client `flowctl`, which lives at [estuary/flowctl](https://github.com/estuary/flowctl).
 
 ### Control-plane Agent
 
@@ -54,17 +54,11 @@ The Control Plane issues access tokens via the `gateway_auth_token` function whi
 
 You'll need:
 
-* An installation of the [Supabase CLI](https://github.com/supabase/cli/releases). Grab the latest release (currently 0.25):
-
-```console
-wget https://github.com/supabase/cli/releases/download/v0.25.0/supabase_0.25.0_linux_amd64.deb
-sudo dpkg -i supabase_0.25.0_linux_amd64.deb
-supabase -v
-```
-
-* A local checkout of [github.com/estuary/flow](github.com/estuary/flow) upon which you've run `make package`. This creates a directory of binaries `${your_checkout}/.build/package/bin/` which the control-plane agent refers to as `--bin-dir` or `$BIN_DIR`.
-* A local checkout of [github.com/estuary/data-plane-gateway](github.com/estuary/data-plane-gateway).
-* A local checkout of [github.com/estuary/ui](github.com/estuary/ui).
+* An installation of the [Supabase CLI](https://github.com/supabase/cli). Follow the installation instructions to install the latest version.
+* A local checkout of [github.com/estuary/flow](https://github.com/estuary/flow) upon which you've run `make package`. This creates a directory of binaries `${your_checkout}/.build/package/bin/` which the control-plane agent refers to as `--bin-dir` or `$BIN_DIR`.
+* A local checkout of [github.com/estuary/data-plane-gateway](https://github.com/estuary/data-plane-gateway).
+* A local checkout of [github.com/estuary/ui](https://github.com/estuary/ui).
+* A local checkout of [github.com/estuary/config-encryption](https://github.com/estuary/config-encryption).
 * A local checkout of this repository.
 
 ### Start Supabase:
@@ -197,36 +191,6 @@ Your installation is seeded with three existing users:
 * carol@example.com
 
 To login with a Magic Link you need to enter an email and then your local will "send" an email. To check this email you need to use Inbucket [http://localhost:5434/](http://localhost:5434/) and click on the link provided in the email.
-
-### Use the `flowctl` CLI:
-
-Get running with the `flowctl` CLI:
-
-```console
-# Build the CLI and symlink for use from any directory:
-cargo build --release -p flowctl
-ln -s ~/estuary/animated-carnival/target/release/flowctl ~/flowctl
-```
-Or run it through `cargo`:
-```console
-cargo run --release -p flowctl -- --help
-```
-
-Authenticate as "bob@example.com" with your local control-plane API:
-```console
-~/flowctl auth develop
-```
-Or, grab an access token from the Admin page and pass it in:
-```console
-~/flowctl auth develop --token your-access-token
-```
-
-Create a draft and publish specifications into your `temp-data-plane`
-```console
-~/flowctl draft create
-~/flowctl draft author --source ~/estuary/flow/examples/citi-bike/flow.yaml
-~/flowctl draft publish
-```
 
 ## Production Migrations
 
