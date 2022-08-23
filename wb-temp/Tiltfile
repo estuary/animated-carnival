@@ -1,0 +1,12 @@
+os.putenv("TMPDIR", "/var/tmp")
+
+local_resource('reactor', serve_cmd='/Users/will/estuary/flow/.build/package/bin/flowctl-admin serve consumer \
+    --broker.address http://192.168.2.47:8080 \
+    --broker.cache.size 128 \
+    --consumer.limit 1024 \
+    --consumer.max-hot-standbys 0 \
+    --consumer.port 9000 \
+    --etcd.address http://192.168.2.47:2379 \
+    --flow.builds-root file:///var/tmp/builds/ \
+    --log.format text \
+    --log.level debug', deps=['/Users/will/estuary/flow/.build/package/bin'])

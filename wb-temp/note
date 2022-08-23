@@ -1,0 +1,20 @@
+/Users/will/estuary/flow/.build/package/bin/flowctl-admin serve consumer \
+    --broker.address http://localhost:8080 \
+    --broker.cache.size 128 \
+    --consumer.limit 1024 \
+    --consumer.max-hot-standbys 0 \
+    --consumer.port 9000 \
+    --consumer.watch-delay 0ms \
+    --etcd.address http://192.168.2.47:2379 \
+    --flow.test-apis \
+    --log.format text \
+    --log.level info
+
+
+    		"--broker.disable-stores",
+		"--broker.max-replication", "1",
+		"--broker.port", port,
+		"--broker.watch-delay", "0ms", // Speed test execution.
+		"--etcd.address", etcdAddr,
+		"--log.format", cmd.Log.Format,
+		"--log.level", cmd.Log.Level,

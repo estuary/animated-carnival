@@ -1,0 +1,32 @@
+version: '3.6'
+
+services:
+
+  etcd:
+    container_name: etcd
+    image: quay.io/coreos/etcd:v3.4.9
+    environment:
+      - ETCD_NAME=s1
+      - ETCD_ADVERTISE_CLIENT_URLS=http://192.168.2.47:2379
+      - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
+      - ETCD_LOG_LEVEL=debug
+      - ETCD_LOGGER=zap
+    ports:
+      - "2379:2379"
+
+  gazette:
+    container_name: gazette
+    image: quay.io/gazette/broker:latest-dev
+    environment:
+      - BROKER_PORT=8080
+      - BROKER_DISABLE_STORES
+      - BROKER_MAX_REPLICATION=1
+      - BROKER_DISABLE_STORES=1
+      - ETCD_ADDRESS=http://192.168.2.47:2379
+      - LOG_LEVEL=debug
+      - LOG_FORMAT=text
+    ports:
+      - "8080:8080"
+    depends_on:
+      - etcd
+    command: [ "/bin/sh", "-ec", "gazette serve" ]
