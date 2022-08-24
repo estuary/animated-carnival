@@ -136,7 +136,7 @@ returns table (role_prefix catalog_prefix, capability grant_capability) as $$
       -- project through grants where object_role acts as the subject_role.
       select role_grants.object_role, role_grants.capability
       from role_grants, all_roles
-      where starts_with(lower(role_grants.subject_role), lower(all_roles.role_prefix))
+      where internal.istarts_with(role_grants.subject_role, all_roles.role_prefix)
         and all_roles.capability = 'admin'
   )
   select role_prefix, capability from all_roles;
@@ -156,7 +156,7 @@ create function auth_catalog(name_or_prefix text, min_cap grant_capability)
 returns boolean as $$
   select exists(
     select 1 from auth_roles() r
-    where starts_with(lower(name_or_prefix), lower(r.role_prefix)) and r.capability >= min_cap
+    where internal.istarts_with(name_or_prefix, r.role_prefix) and r.capability >= min_cap
   )
 $$ language sql stable;
 comment on function auth_catalog is

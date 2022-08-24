@@ -188,12 +188,12 @@ pub async fn resolve_spec_rows(
             coalesce(
                 (select json_agg(row_to_json(role_grants))
                 from role_grants
-                where starts_with(lower(draft_specs.catalog_name), lower(subject_role))),
+                where internal.istarts_with(draft_specs.catalog_name, subject_role)),
                 '[]'
             ) as "spec_capabilities!: Json<Vec<RoleGrant>>",
             (
                 select max(capability) from internal.user_roles($2) r
-                where starts_with(lower(draft_specs.catalog_name), lower(r.role_prefix))
+                where internal.istarts_with(draft_specs.catalog_name, r.role_prefix)
             ) as "user_capability: Capability"
         from draft_specs
         join live_specs
@@ -506,8 +506,8 @@ pub async fn resolve_storage_mappings(
             m.spec
         from storage_mappings m,
         lateral unnest($1::text[]) as n
-        where starts_with(lower(n), lower(m.catalog_prefix))
-           or starts_with(lower('recovery/' || n), lower(m.catalog_prefix))
+        where internal.istarts_with(n, m.catalog_prefix)
+           or internal.istarts_with('recovery/' || n, m.catalog_prefix)
            -- TODO(johnny): hack until we better-integrate ops collections.
            or m.catalog_prefix = 'ops/'
         group by m.id;

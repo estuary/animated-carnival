@@ -200,11 +200,13 @@ pub fn validate_transition(
             // of referenced collections.
             continue;
         }
-        // Check that the specification is authorized to its referants.
+        // Check that the specification is authorized to its referents.
         let (reads_from, writes_to, _) = extract_spec_metadata(draft, spec_row);
         for source in reads_from.iter().flatten() {
             if !spec_capabilities.iter().any(|c| {
-                source.starts_with(&c.object_role)
+                source
+                    .to_lowercase()
+                    .starts_with(&c.object_role.to_lowercase())
                     && matches!(
                         c.capability,
                         Capability::Read | Capability::Write | Capability::Admin
@@ -222,7 +224,9 @@ pub fn validate_transition(
         }
         for target in writes_to.iter().flatten() {
             if !spec_capabilities.iter().any(|c| {
-                target.starts_with(&c.object_role)
+                target
+                    .to_lowercase()
+                    .starts_with(&c.object_role.to_lowercase())
                     && matches!(c.capability, Capability::Write | Capability::Admin)
             }) {
                 errors.push(Error {

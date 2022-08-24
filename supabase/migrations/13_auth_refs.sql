@@ -16,8 +16,8 @@ join live_spec_flows e on src.spec_type in ('capture', 'test') and src.id = e.so
 join live_specs tgt on e.target_id = tgt.id
 where not exists(
   select 1 from role_grants
-  where starts_with(src.catalog_name, subject_role) and
-        starts_with(tgt.catalog_name, object_role) and
+  where internal.istarts_with(src.catalog_name, subject_role) and
+        internal.istarts_with(tgt.catalog_name, object_role) and
         capability >= 'write'
 );
 
@@ -36,8 +36,8 @@ join live_spec_flows e on src.spec_type = 'collection' and src.id = e.source_id
 join live_specs tgt on e.target_id = tgt.id
 where not exists(
   select 1 from role_grants
-  where starts_with(src.catalog_name, object_role) and
-        starts_with(tgt.catalog_name, subject_role) and
+  where internal.istarts_with(src.catalog_name, object_role) and
+        internal.istarts_with(tgt.catalog_name, subject_role) and
         capability >= 'read'
 );
 

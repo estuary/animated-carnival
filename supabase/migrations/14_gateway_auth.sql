@@ -56,9 +56,8 @@ returns table (token text, gateway_url text) as $$
   with authorized_prefixes as (
     select p as prefix
     from auth_roles() as r, unnest(prefixes) as p
-    where starts_with(p, r.role_prefix)
+    where internal.istarts_with(p, r.role_prefix)
   )
-
   select internal.sign_jwt(
     json_build_object(
       'exp', trunc(extract(epoch from (now() + interval '1 hour'))),

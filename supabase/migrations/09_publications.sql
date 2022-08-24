@@ -116,8 +116,8 @@ begin
   -- Search for an existing row which is a case-invariant prefix match of the proposed row.
   select cur.catalog_name into conflict_name from live_specs as cur
   where
-    starts_with(lower(new.catalog_name), lower(cur.catalog_name) || '/') or
-    starts_with(lower(cur.catalog_name), lower(new.catalog_name) || '/')
+    internal.istarts_with(new.catalog_name, cur.catalog_name || '/') or
+    internal.istarts_with(cur.catalog_name, new.catalog_name || '/')
   limit 1;
 
   if found then

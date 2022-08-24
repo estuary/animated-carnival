@@ -37,3 +37,7 @@ Enumeration of Flow catalog specification types:
 "capture", "collection", "materialization", or "test"
 ';
 
+create function internal.istarts_with(string text, prefix text)
+returns boolean as $$
+  select starts_with(lower(string), lower(prefix))
+$$ language sql immutable;

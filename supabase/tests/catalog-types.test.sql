@@ -31,6 +31,15 @@ begin
         );
     end case;
   end loop;
+end;
+$$ language plpgsql;
+
+
+create or replace function tests.test_catalog_prefix_constraints()
+returns setof text as $$
+declare
+  test_case record;
+begin
 
   for test_case in
     select "prefix", "valid" from (values
@@ -58,6 +67,33 @@ begin
           format('invalid catalog_prefix: %s', test_case."prefix")
         );
     end case;
+  end loop;
+end;
+$$ language plpgsql;
+
+
+create or replace function tests.test_case_invariant_starts_with()
+returns setof text as $$
+declare
+  test_case record;
+begin
+
+  for test_case in
+    select "string", "prefix", "valid" from (values
+      ('foo/bar', 'foo/', true),
+      ('foo/bar', 'Foo/', true),
+      ('Foo/bar', 'foo/', true),
+      ('Ḃar/quip', 'Ḃar/', true),
+      ('ḃar/quip', 'Ḃar/', true),
+      ('ḃar/quip', 'Other/', false),
+      ('otherr/', 'other/', false)
+    ) as t("string", "prefix", "valid")
+  loop
+
+    return query select is(
+      internal.istarts_with(test_case.string, test_case.prefix), test_case.valid
+    );
+
   end loop;
 end;
 $$ language plpgsql;

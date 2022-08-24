@@ -13,7 +13,7 @@ CREATE OR REPLACE FUNCTION public.auth_catalog(IN name_or_prefix text,IN min_cap
 AS $BODY$
   select exists(
     select 1 from auth_roles() r
-    where starts_with(lower(name_or_prefix), lower(r.role_prefix)) and r.capability >= min_cap
+    where internal.istarts_with(name_or_prefix, r.role_prefix) and r.capability >= min_cap
   )
 $BODY$;
 
@@ -38,8 +38,8 @@ begin
   -- Search for an existing row which is a case-invariant prefix match of the proposed row.
   select cur.catalog_name into conflict_name from live_specs as cur
   where
-    starts_with(lower(new.catalog_name), lower(cur.catalog_name) || '/') or
-    starts_with(lower(cur.catalog_name), lower(new.catalog_name) || '/')
+    internal.istarts_with(new.catalog_name, cur.catalog_name || '/') or
+    internal.istarts_with(cur.catalog_name, new.catalog_name || '/')
   limit 1;
 
   if found then
@@ -99,7 +99,7 @@ AS $BODY$
       -- project through grants where object_role acts as the subject_role.
       select role_grants.object_role, role_grants.capability
       from role_grants, all_roles
-      where starts_with(lower(role_grants.subject_role), lower(all_roles.role_prefix))
+      where internal.istarts_with(role_grants.subject_role, all_roles.role_prefix)
         and all_roles.capability = 'admin'
   )
   select role_prefix, capability from all_roles;
