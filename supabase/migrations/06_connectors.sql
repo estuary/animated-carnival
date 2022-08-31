@@ -1,6 +1,6 @@
 create domain jsonb_internationalized_value as jsonb check (
   jsonb_typeof(value) = 'object' AND 
-  'en-US' = ANY jsonb_object_keys(value)
+  value->'en-US' IS NOT NULL
 );
 comment on domain jsonb_internationalized_value is
   'jsonb_internationalized_value is JSONB object which is required to at least have en-US internationalized values';
