@@ -1,6 +1,7 @@
 create domain jsonb_internationalized_value as jsonb check (
-  jsonb_typeof(value) = 'object' AND 
-  value->'en-US' IS NOT NULL
+  (value is null) OR -- This feels wrong, but without it the check constraint fails on nulls
+  (jsonb_typeof(value) = 'object' AND 
+  (value->'en-US' IS NOT NULL))
 );
 comment on domain jsonb_internationalized_value is
   'jsonb_internationalized_value is JSONB object which is required to at least have en-US internationalized values';
