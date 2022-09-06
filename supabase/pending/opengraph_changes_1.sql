@@ -17,27 +17,48 @@ ALTER DOMAIN public.jsonb_internationalized_value
 
 COMMENT ON DOMAIN public.jsonb_internationalized_value
     IS 'jsonb_internationalized_value is JSONB object which is required to at least have en-US internationalized values';
+CREATE OR REPLACE FUNCTION public.generate_opengraph_value(
+	opengraph_raw jsonb,
+	opengraph_patch jsonb,
+	field text)
+    RETURNS jsonb_internationalized_value
+    LANGUAGE 'plpgsql'
+    COST 100
+    IMMUTABLE PARALLEL UNSAFE
+AS $BODY$
+BEGIN
+    RETURN json_build_object('en-US',internal.jsonb_merge_patch(opengraph_raw, opengraph_patch) #>> ('{"en-US", "'|| field ||'"}')::text[]);
+END
+$BODY$;
+
+alter function public.generate_opengraph_value(jsonb, jsonb, text) owner to authenticated;
+
 
 ALTER TABLE IF EXISTS public.connectors
-    ADD COLUMN logo_url jsonb_internationalized_value;
-
-COMMENT ON COLUMN public.connectors.logo_url
-    IS 'The url for this connector''s logo image. Represented as a json object with IETF language tags as keys (https://en.wikipedia.org/wiki/IETF_language_tag), and urls as values';
-
-ALTER TABLE IF EXISTS public.connectors
-    ADD COLUMN recommended boolean NOT NULL DEFAULT false;
-
-ALTER TABLE IF EXISTS public.connectors
-    ADD COLUMN short_description jsonb_internationalized_value;
+    ADD COLUMN short_description jsonb_internationalized_value GENERATED ALWAYS AS (generate_opengraph_value((open_graph_raw)::jsonb, (open_graph_patch)::jsonb, 'description'::text)) STORED;
 
 COMMENT ON COLUMN public.connectors.short_description
     IS 'A short description of this connector, at most a few sentences. Represented as a json object with IETF language tags as keys (https://en.wikipedia.org/wiki/IETF_language_tag), and the description string as values';
 
 ALTER TABLE IF EXISTS public.connectors
-    ADD COLUMN title jsonb_internationalized_value;
+    ADD COLUMN title jsonb_internationalized_value GENERATED ALWAYS AS (generate_opengraph_value((open_graph_raw)::jsonb, (open_graph_patch)::jsonb, 'title'::text)) STORED;
 
 COMMENT ON COLUMN public.connectors.title
     IS 'The title of this connector. Represented as a json object with IETF language tags as keys (https://en.wikipedia.org/wiki/IETF_language_tag), and the title string as values';
+
+ALTER TABLE IF EXISTS public.connectors
+    ADD COLUMN logo_url jsonb_internationalized_value GENERATED ALWAYS AS (generate_opengraph_value((open_graph_raw)::jsonb, (open_graph_patch)::jsonb, 'image'::text)) STORED;
+
+COMMENT ON COLUMN public.connectors.logo_url
+    IS 'The url for this connector''s logo image. Represented as a json object with IETF language tags as keys (https://en.wikipedia.org/wiki/IETF_language_tag), and urls as values';
+
+ALTER TABLE IF EXISTS public.connectors
+    ADD COLUMN recommended boolean NOT NULL GENERATED ALWAYS AS (
+CASE
+    WHEN (((internal.jsonb_merge_patch((open_graph_raw)::jsonb, (open_graph_patch)::jsonb) -> 'en-US'::text) ->> 'recommended'::text) = 'True'::text) THEN true
+    ELSE false
+END) STORED;
+
 -- Changing the columns in a view requires dropping and re-creating the view.
 -- This may fail if other objects are dependent upon this view,
 -- or may cause procedural functions to fail if they are not modified to

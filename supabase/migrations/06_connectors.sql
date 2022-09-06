@@ -6,6 +6,16 @@ create domain jsonb_internationalized_value as jsonb check (
 comment on domain jsonb_internationalized_value is
   'jsonb_internationalized_value is JSONB object which is required to at least have en-US internationalized values';
 
+CREATE OR REPLACE FUNCTION 
+generate_opengraph_value( opengraph_raw jsonb, opengraph_patch jsonb, field text )
+RETURNS jsonb_internationalized_value
+AS $CODE$
+BEGIN
+    RETURN json_build_object('en-US',internal.jsonb_merge_patch(opengraph_raw, opengraph_patch) #>> ('{"en-US", "'|| field ||'"}')::text[]);
+END
+$CODE$
+LANGUAGE plpgsql IMMUTABLE;
+
 -- Known connectors.
 create table connectors (
   like internal._model including all,
@@ -18,10 +28,10 @@ create table connectors (
   open_graph_raw         jsonb_obj,
   open_graph_patch       jsonb_obj,
   --        End to be deleted        --
-  title                  jsonb_internationalized_value,
-  short_description      jsonb_internationalized_value,
-  logo_url               jsonb_internationalized_value,
-  recommended            boolean not null default false,
+  title                  jsonb_internationalized_value generated always as (generate_opengraph_value(open_graph_raw, open_graph_patch,'title')) stored,
+  short_description      jsonb_internationalized_value generated always as (generate_opengraph_value(open_graph_raw, open_graph_patch,'description')) stored,
+  logo_url               jsonb_internationalized_value generated always as (generate_opengraph_value(open_graph_raw, open_graph_patch,'image')) stored,
+  recommended            boolean not null generated always as (case when internal.jsonb_merge_patch(open_graph_raw, open_graph_patch)->'en-US'->>'recommended'::text = 'True' then TRUE else FALSE end) stored,
   oauth2_client_id       text,
   oauth2_client_secret   text,
   oauth2_injected_values jsonb_obj,

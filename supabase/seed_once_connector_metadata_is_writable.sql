@@ -71,25 +71,28 @@ declare
   connector_id flowid;
 begin
 
-  insert into connectors (image_name, detail, external_url) values (
+  insert into connectors (image_name, title, short_description, external_url) values (
     'ghcr.io/estuary/source-hello-world',
-    'A flood of greetings',
+    json_build_object('en-US','Hello World'),
+    json_build_object('en-US','A flood of greetings'),
     'https://estuary.dev'
   )
   returning id strict into connector_id;
   insert into connector_tags (connector_id, image_tag) values (connector_id, ':v1');
 
-  insert into connectors (image_name, detail, external_url) values (
+  insert into connectors (image_name, title, short_description, external_url) values (
     'ghcr.io/estuary/source-postgres',
-    'Capture PostgreSQL tables into collections',
+    json_build_object('en-US','PostgreSQL'),
+    json_build_object('en-US','Capture PostgreSQL tables into collections'),
     'https://postgresql.org'
   )
   returning id strict into connector_id;
   insert into connector_tags (connector_id, image_tag) values (connector_id, ':v1');
 
-  insert into connectors (image_name, detail, external_url) values (
+  insert into connectors (image_name, title, short_description, external_url) values (
     'ghcr.io/estuary/materialize-postgres',
-    'Materialize collections into PostgreSQL',
+    json_build_object('en-US','PostgreSQL'),
+    json_build_object('en-US','Materialize collections into PostgreSQL'),
     'https://postgresql.org'
   )
   returning id strict into connector_id;
