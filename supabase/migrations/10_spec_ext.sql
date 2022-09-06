@@ -76,7 +76,7 @@ comment on view combined_grants_ext is
 
 
 -- Extended view of live catalog specifications.
-CREATE VIEW live_specs_ext as
+create view live_specs_ext as
 select
   l.*,
   c.external_url as connector_external_url,
