@@ -40,11 +40,18 @@ pub enum Directive {
     Grant(grant::Directive),
 }
 
-pub struct DirectiveHandler {}
+#[derive(Default)]
+pub struct DirectiveHandler {
+    tenant_template: models::Catalog,
+    accounts_user_email: String,
+}
 
 impl DirectiveHandler {
-    pub fn new() -> Self {
-        Self {}
+    pub fn new(tenant_template: models::Catalog, accounts_user_email: String) -> Self {
+        Self {
+            tenant_template,
+            accounts_user_email,
+        }
     }
 }
 
@@ -87,7 +94,16 @@ impl DirectiveHandler {
 
         let status = match serde_json::from_str::<Directive>(row.directive_spec.0.get()) {
             Err(err) => JobStatus::invalid_directive(err.into()),
-            Ok(Directive::BetaOnboard(d)) => beta_onboard::apply(d, row, txn).await?,
+            Ok(Directive::BetaOnboard(d)) => {
+                beta_onboard::apply(
+                    d,
+                    row,
+                    &self.accounts_user_email,
+                    &self.tenant_template,
+                    txn,
+                )
+                .await?
+            }
             Ok(Directive::ClickToAccept(d)) => click_to_accept::apply(d, row, txn).await?,
             Ok(Directive::Grant(d)) => grant::apply(d, row, txn).await?,
         };

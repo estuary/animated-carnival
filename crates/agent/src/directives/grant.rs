@@ -123,7 +123,7 @@ mod test {
         .await
         .unwrap();
 
-        let mut handler = DirectiveHandler::new();
+        let mut handler = DirectiveHandler::default();
         while let Some(row) = agent_sql::directives::dequeue(&mut txn).await.unwrap() {
             let (id, status) = handler.process(row, &mut txn).await.unwrap();
             agent_sql::directives::resolve(id, status, &mut txn)
@@ -238,10 +238,6 @@ mod test {
           grants.iter().map(|r| -> serde_json::Value { r.get(0) }).collect::<Vec<_>>(),
           @r###"
         [
-          {
-            "cap": "admin",
-            "obj": "aliceCo/"
-          },
           {
             "cap": "write",
             "obj": "One/Two/Three/"

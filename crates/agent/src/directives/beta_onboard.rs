@@ -20,6 +20,8 @@ pub struct Claims {
 pub async fn apply(
     directive: Directive,
     row: agent_sql::directives::Row,
+    accounts_user_email: &str,
+    tenant_template: &models::Catalog,
     txn: &mut sqlx::Transaction<'_, sqlx::Postgres>,
 ) -> anyhow::Result<JobStatus> {
     let (Directive {}, Claims { requested_tenant }) = match extract(directive, &row.user_claims) {
@@ -45,13 +47,21 @@ pub async fn apply(
         )));
     }
 
-    agent_sql::directives::beta_onboard::provision_user(
-        row.user_id,
-        &requested_tenant,
+    let provisioned_user = agent_sql::directives::beta_onboard::provision_tenant(
+        accounts_user_email,
         Some("applied via directive".to_string()),
+        &requested_tenant,
+        row.user_id,
         txn,
     )
     .await?;
+
+    // Fill out the tenant file spec template with the actual tenant name,
+    // and upsert it into provisioned draft.
+    let tenant_template = serde_json::to_string(tenant_template).unwrap();
+    let tenant_template = tenant_template.replace("TENANT", requested_tenant.as_str());
+    let tenant_template: models::Catalog = serde_json::from_str(&tenant_template).unwrap();
+    crate::upsert_draft_specs(provisioned_user.draft_id, tenant_template, txn).await?;
 
     info!(%row.user_id, requested_tenant=%requested_tenant.as_str(), "beta onboard");
     Ok(JobStatus::Success)
@@ -61,6 +71,7 @@ pub async fn apply(
 mod test {
 
     use super::super::DirectiveHandler;
+    use serde_json::json;
     use sqlx::{Connection, Row};
 
     const FIXED_DATABASE_URL: &str = "postgresql://postgres:postgres@localhost:5432/postgres";
@@ -82,7 +93,8 @@ mod test {
         ),
         p2 as (
           insert into auth.users (id, email) values
-          ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'new@example.com')
+          ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'new@example.com'),
+          ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'accounts@example.com')
         ),
         p3 as (
           insert into applied_directives (directive_id, user_id, user_claims) values
@@ -108,7 +120,26 @@ mod test {
         .await
         .unwrap();
 
-        let mut handler = DirectiveHandler::new();
+        let tenant_template: models::Catalog = serde_json::from_value(json!({
+          "collections": {
+            "ops/TENANT/fixture":{
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "k": {"type": "integer"}
+                },
+                "required": ["k"]
+              },
+              "key": ["/k"]
+            }
+          }
+        }))
+        .unwrap();
+
+        let mut handler = DirectiveHandler {
+            tenant_template,
+            accounts_user_email: "accounts@example.com".to_string(),
+        };
         while let Some(row) = agent_sql::directives::dequeue(&mut txn).await.unwrap() {
             let (id, status) = handler.process(row, &mut txn).await.unwrap();
             agent_sql::directives::resolve(id, status, &mut txn)
@@ -201,14 +232,26 @@ mod test {
         "###);
 
         let grants = sqlx::query(
-            r#"select json_build_object('userGrantObj', g.object_role, 'cap', g.capability)
+            r#"
+            -- Expect a user grant was created.
+            select json_build_object('userGrantObj', g.object_role, 'cap', g.capability)
                 from user_grants g where user_id = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'
             union all
+            -- Expect a role grant was created.
             select json_build_object('roleGrantObj', g.object_role, 'cap', g.capability)
                 from role_grants g where subject_role = 'AcmeTenant/'
             union all
+            -- Expect a storage mapping was created.
             select json_build_object('prefix', m.catalog_prefix, 'storageMapping', m.spec)
                 from storage_mappings m where m.catalog_prefix like '%AcmeTenant%'
+            union all
+            -- Expect a draft & publication was created.
+            select json_build_object('name', s.catalog_name, 'spec', s.spec)
+                from draft_specs s join drafts d on d.id = s.draft_id
+                where d.user_id = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'
+            union all
+            select json_build_object('publication', true)
+                from publications p where p.user_id = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'
             "#,
         )
         .fetch_all(&mut txn)
@@ -248,6 +291,28 @@ mod test {
                 }
               ]
             }
+          },
+          {
+            "name": "ops/AcmeTenant/fixture",
+            "spec": {
+              "key": [
+                "/k"
+              ],
+              "schema": {
+                "properties": {
+                  "k": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "k"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          {
+            "publication": true
           }
         ]
         "###);
