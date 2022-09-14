@@ -43,6 +43,7 @@ pub async fn run(
     name: &str,
     logs_tx: &logs::Tx,
     logs_token: Uuid,
+    only_log_on_error: bool,
     cmd: &mut tokio::process::Command,
 ) -> Result<std::process::ExitStatus, Error> {
     // Pass through PATH and any docker-related variables, but remove all other environment variables.
@@ -50,7 +51,7 @@ pub async fn run(
         k == "PATH" || k.contains("DOCKER") || k == "GOOGLE_APPLICATION_CREDENTIALS"
     }));
 
-    run_without_removing_env(name, logs_tx, logs_token, cmd).await
+    run_without_removing_env(name, logs_tx, logs_token, only_log_on_error, cmd).await
 }
 
 /// Does the same thing as `run`, but doesn't modify the environment given in `cmd`.
@@ -59,12 +60,13 @@ pub async fn run_without_removing_env(
     name: &str,
     logs_tx: &logs::Tx,
     logs_token: Uuid,
+    only_log_on_error: bool,
     cmd: &mut tokio::process::Command,
 ) -> Result<std::process::ExitStatus, Error> {
     let child = spawn(name, cmd)?;
     let stdin: &[u8] = &[];
 
-    wait(name, logs_tx, logs_token, stdin, child)
+    wait(name, logs_tx, logs_token, only_log_on_error, stdin, child)
         .await
         .map_err(|err| Error::detail(err, name, cmd))
 }
@@ -84,7 +86,7 @@ pub async fn run_with_output(
     let stdout = child.stdout.take().unwrap();
 
     Ok(futures::try_join!(
-        wait(name, logs_tx, logs_token, stdin, child),
+        wait(name, logs_tx, logs_token, false, stdin, child),
         read_stdout(stdout)
     )
     .map_err(|err| Error::detail(err, name, cmd))?)
@@ -108,7 +110,7 @@ where
     let stdout = child.stdout.take().unwrap();
 
     Ok(futures::try_join!(
-        wait(name, logs_tx, logs_token, stdin, child),
+        wait(name, logs_tx, logs_token, false, stdin, child),
         read_stdout(stdout)
     )
     .map_err(|err| Error::detail(err, name, cmd))?)
@@ -140,6 +142,7 @@ pub async fn wait<I>(
     name: &str,
     logs_tx: &logs::Tx,
     logs_token: Uuid,
+    only_log_on_error: bool,
     mut stdin: I,
     mut child: tokio::process::Child,
 ) -> Result<std::process::ExitStatus, Error>
@@ -174,9 +177,17 @@ where
     }
     .map_err(Error::Stderr);
 
-    let wait = child.wait().map_err(Error::Wait);
+    let status = child.wait().map_err(Error::Wait).await?;
 
-    let (_, _, _, status) = futures::try_join!(stdin, stdout, stderr, wait)?;
+    // If you don't await a future then it doesn't run, so the consequence
+    // of this should be to only stream std(out|err) to logs if there was an error,
+    // or if only_log_on_error wasn't set
+    if !only_log_on_error || (only_log_on_error && !status.success()) {
+        logs::write_line(logs_tx.clone(), name.to_string(), logs_token, &format!("Error while running command: {}", name)).await.unwrap();
+        futures::try_join!(stdin, stdout)?;
+    } else {
+        logs::write_line(logs_tx.clone(), name.to_string(), logs_token, &format!("Command succeeded: {}", name)).await.unwrap();
+    }
 
     Ok(status)
 }

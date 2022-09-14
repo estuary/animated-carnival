@@ -16,6 +16,26 @@ pub struct Line {
 // Tx is the channel sender of log Lines.
 pub type Tx = tokio::sync::mpsc::Sender<Line>;
 
+// Sends a single log line to the Sender
+#[tracing::instrument(err, skip(tx, line))]
+pub async fn write_line(
+    tx: Tx,
+    stream: String,
+    token: Uuid,
+    line: &str,
+) -> Result<(), std::io::Error>
+{
+    tx.send(Line {
+        token,
+        stream: stream.clone(),
+        line: line.to_string(),
+    })
+    .await
+    .unwrap();
+
+    Ok(())
+}
+
 // capture_job_logs consumes newline-delimited lines from the AsyncRead and
 // streams each as a Line to the channel Sender.
 #[tracing::instrument(err, skip(tx, reader))]

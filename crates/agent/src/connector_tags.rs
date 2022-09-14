@@ -82,6 +82,7 @@ impl TagHandler {
                 "pull",
                 &self.logs_tx,
                 row.logs_token,
+                true, // Certainly don't want docker pull output unless there's an error
                 tokio::process::Command::new("docker")
                     .arg("pull")
                     .arg(&image_composed),

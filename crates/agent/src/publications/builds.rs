@@ -39,6 +39,7 @@ pub async fn build_catalog(
         "build",
         logs_tx,
         logs_token,
+        true, // No need to log a bunch of docker output etc if the command succeeds
         tokio::process::Command::new(format!("{bindir}/flowctl-go"))
             .arg("api")
             .arg("build")
@@ -71,6 +72,7 @@ pub async fn build_catalog(
         "persist",
         &logs_tx,
         logs_token,
+        true, // No need to log a bunch of stuff about file copies if we're successful
         tokio::process::Command::new("gsutil")
             .arg("cp")
             .arg(&db_path)
@@ -120,6 +122,7 @@ pub async fn data_plane(
         "temp-data-plane",
         logs_tx,
         logs_token,
+        false, // Fairly sure we always want these logs
         tokio::process::Command::new(format!("{bindir}/flowctl-go"))
             .arg("temp-data-plane")
             .arg("--network")
@@ -166,6 +169,7 @@ pub async fn test_catalog(
         "setup",
         &logs_tx,
         logs_token,
+        false, // Logging related to testing left in
         tokio::process::Command::new(format!("{bindir}/flowctl-go"))
             .arg("api")
             .arg("activate")
@@ -197,6 +201,7 @@ pub async fn test_catalog(
         "test",
         &logs_tx,
         logs_token,
+        false, // We always want to see test results, because "23/23 tests passed" feels warm and fuzzy
         tokio::process::Command::new(format!("{bindir}/flowctl-go"))
             .arg("api")
             .arg("test")
@@ -224,6 +229,7 @@ pub async fn test_catalog(
         "cleanup",
         logs_tx,
         logs_token,
+        true, // Probably don't care about this unless it fails
         tokio::process::Command::new(format!("{bindir}/flowctl-go"))
             .arg("api")
             .arg("delete")
@@ -289,6 +295,7 @@ pub async fn deploy_build(
         "activate",
         logs_tx,
         logs_token,
+        true, // We only want to see detailed output if this fails
         tokio::process::Command::new(format!("{bindir}/flowctl-go"))
             .arg("api")
             .arg("activate")
@@ -340,6 +347,7 @@ pub async fn deploy_build(
             "delete",
             logs_tx,
             logs_token,
+            true, // We only want to see detailed output if this fails 
             tokio::process::Command::new(format!("{bindir}/flowctl-go"))
                 .arg("api")
                 .arg("delete")
