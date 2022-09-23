@@ -120,6 +120,81 @@ async fn test_materialization_expansions() {
 }
 
 #[tokio::test]
+async fn test_materialization_expansions_shared_collections() {
+    let mut conn = sqlx::postgres::PgConnection::connect(&FIXED_DATABASE_URL)
+        .await
+        .expect("connect");
+
+    let mut txn = conn.begin().await.unwrap();
+
+    sqlx::query(
+        r#"
+    with specs as (
+        insert into live_specs (id, catalog_name, spec, spec_type) values
+        ('aa00000000000000', 'g/materialization1', '1', 'materialization'),
+        ('bb00000000000000', 'g/materialization2', '1', 'materialization'),
+        ('cc00000000000000', 'g/collection', '1', 'collection')
+    ),
+    flows as (
+        insert into live_spec_flows(source_id, target_id, flow_type) values
+        ('cc00000000000000', 'aa00000000000000', 'materialization'),
+        ('cc00000000000000', 'bb00000000000000', 'materialization')
+    )
+    select 1;
+    "#,
+    )
+    .execute(&mut txn)
+    .await
+    .unwrap();
+
+    assert_set(
+        vec![0xaa],
+        vec![0xcc],
+        &mut txn,
+        "materialization expands to its source, but not materializations from that source",
+    )
+    .await;
+}
+
+#[tokio::test]
+async fn test_materialization_expansions_shared_simple() {
+    let mut conn = sqlx::postgres::PgConnection::connect(&FIXED_DATABASE_URL)
+        .await
+        .expect("connect");
+
+    let mut txn = conn.begin().await.unwrap();
+
+    // Fixture: a materialization of two LHS and RHS derivations which each have a source collection.
+    sqlx::query(
+        r#"
+    with specs as (
+        insert into live_specs (id, catalog_name, spec, spec_type) values
+        ('aa00000000000000', 'g/capture', '1', 'capture'),
+        ('bb00000000000000', 'g/collection1', '1', 'collection'),
+        ('dd00000000000000', 'g/collection2', '1', 'collection')
+    ),
+    flows as (
+        insert into live_spec_flows(source_id, target_id, flow_type) values
+        ('aa00000000000000', 'bb00000000000000', 'capture'),
+        ('aa00000000000000', 'dd00000000000000', 'capture')
+    )
+    select 1;
+    "#,
+    )
+    .execute(&mut txn)
+    .await
+    .unwrap();
+
+    assert_set(
+        vec![0xbb],
+        vec![0xaa, 0xdd],
+        &mut txn,
+        "collection expands to capture and the collection from that capture",
+    )
+    .await;
+}
+
+#[tokio::test]
 async fn test_test_expansions() {
     let mut conn = sqlx::postgres::PgConnection::connect(&FIXED_DATABASE_URL)
         .await
