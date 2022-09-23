@@ -249,28 +249,20 @@ pub async fn resolve_expanded_rows(
         --   * A seed collection expands to captures or materializations which bind it,
         --      and from there to all of its other bound collections.
         pass_one_b(id) as (
-            -- this should get materializations or captures for a collection
-            -- if this is a collection, then it will be the source for a materialization
-            -- if this is NOT a collection, should return nothing!
-            with connected_to_collections(id) as (
-                select case when s.id = e.source_id then e.target_id else e.source_id end
-                from seeds as s join live_spec_flows as e
-                on s.id = e.source_id and e.flow_type = 'materialization' or s.id = e.target_id and e.flow_type = 'capture'
-            ),
-            this_thing_if_its_not_a_collection(id) as (
-                select s.id
-                from seeds as s join live_spec_flows as e
-                on s.id = e.source_id and e.flow_type = 'capture' or s.id = e.target_id and e.flow_type = 'materialization'
-                limit 1
+            -- Expand collections to bound captures & materializations.
+            with including_adjacent(id) as (
+                  select case when s.id = e.source_id then e.target_id else e.source_id end
+                  from seeds as s join live_spec_flows as e
+                  on s.id = e.source_id and e.flow_type = 'materialization' or s.id = e.target_id and e.flow_type = 'capture'
+                union
+                  select * from seeds
             )
-            -- we've got captures/materializations, so now get connected collections
-            -- we do need this thing to be included too! this will only get connected collections
+            -- Expand captures & materializations to bound collections.
             select case when p.id = e.source_id then e.target_id else e.source_id end
-            from (SELECT id FROM connected_to_collections UNION SELECT id FROM this_thing_if_its_not_a_collection) as p join live_spec_flows as e
-            on p.id = e.source_id or p.id = e.target_id
-            where e.flow_type in ('capture', 'materialization')
-            UNION
-            select id from (SELECT id FROM connected_to_collections UNION SELECT id FROM this_thing_if_its_not_a_collection) as this_one
+              from (select id from including_adjacent) as p join live_spec_flows as e
+              on p.id = e.source_id or p.id = e.target_id
+            union
+              select * from including_adjacent
         ),
         -- Second pass recursively walks backwards along data-flow edges to
         -- expand derivations and tests:
