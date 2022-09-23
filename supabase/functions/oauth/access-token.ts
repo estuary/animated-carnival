@@ -5,6 +5,7 @@ import jsonpointer from "https://esm.sh/jsonpointer.js";
 import { returnPostgresError, handlebarsHelpers } from "../_shared/helpers.ts";
 import { corsHeaders } from "../_shared/cors.ts";
 import { supabaseClient } from "../_shared/supabaseClient.ts";
+import _ from "https://cdn.skypack.dev/lodash";
 
 export async function accessToken(req: Record<string, any>) {
   const { state, config, redirect_uri, ...params } = req;
@@ -35,17 +36,20 @@ export async function accessToken(req: Record<string, any>) {
     ...params,
   });
 
-  const bodyTemplate = Handlebars.compile(
-    oauth2_spec.accessTokenBody
-  );
-  const body = bodyTemplate({
-    redirect_uri,
-    client_id: oauth2_client_id,
-    client_secret: oauth2_client_secret,
-    config,
-    ...oauth2_injected_values,
-    ...params,
-  });
+  let body = "";
+  if (oauth2_spec.accessTokenBody) {
+    const bodyTemplate = Handlebars.compile(
+      oauth2_spec.accessTokenBody
+    );
+    body = bodyTemplate({
+      redirect_uri,
+      client_id: oauth2_client_id,
+      client_secret: oauth2_client_secret,
+      config,
+      ...oauth2_injected_values,
+      ...params,
+    });
+  }
 
   let headers = {};
   if (oauth2_spec.accessTokenHeaders) {
