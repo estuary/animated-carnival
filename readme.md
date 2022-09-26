@@ -1,5 +1,11 @@
+# Archived
 
-# Flow Control-Plane
+The contents of this repository have been merged into [flow](https://github.com/estuary/flow). This repository has been set to read-only.
+
+---
+
+
+## Flow Control-Plane
 
 The Flow control-plane orchestrates the Flow data-plane, controlling the specifications which are running in the data-plane, their activations, deletions, and so on. It provides APIs through which users can draft changes to specifications, holistically test their drafts, publish them as live specifications into the data-plane, monitor their execution, and understand the history of specification changes over time.
 
